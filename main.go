@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/awsutil"
@@ -37,7 +36,9 @@ func putMetric(metricdata []*cloudwatch.MetricDatum, namespace, region string) e
 	resp, err := svc.PutMetricData(metric_input)
 	if err != nil {
 		if awsErr, ok := err.(awserr.Error); ok {
-			return fmt.Errorf("[%s] %s", awsErr.Code, awsErr.Message)
+			log.Println("Error when putMetric, ", awsErr.Code(), awsErr.Message())
+			log.Println("Error:", awsErr.Error())
+			return err
 		} else if err != nil {
 			return err
 		}
@@ -51,7 +52,7 @@ func main() {
 	var dims []*cloudwatch.Dimension
 	metric_name := flag.String("metric-name", "", "Cloudwatch metric name(required)")
 	ns := flag.String("namespace", "Linux/System", "Cloudwatch metric namespace(default: Linux/System)")
-	unit := flag.String("unit", "counts", "Metric Unit")
+	unit := flag.String("unit", "Count", "Metric Unit")
 	ds := flag.String("dimensions", "", "Cloudwatch Dimensions")
 	region := flag.String("region", "us-east-1", "AWS Region")
 	val := flag.Float64("value", 0.0, "Value of the metric")
